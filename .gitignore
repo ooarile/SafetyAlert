@@ -1,0 +1,13 @@
+# 빌드 산출물 / 반입 파일
+dist/
+bin/
+obj/
+
+# 고객사 비밀정보
+.env
+**/settings.local.json
+*.log
+
+# OS
+Thumbs.db
+Desktop.ini

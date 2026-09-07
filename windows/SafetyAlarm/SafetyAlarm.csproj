@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>SafetyAlarm</RootNamespace>
+    <AssemblyName>SafetyAlarm</AssemblyName>
+    <Version>1.0.0</Version>
+    <Company>Safety</Company>
+    <Product>세이프티 알람</Product>
+    <!-- 폐쇄망 재빌드 시 NuGet 의존성 문제를 피하기 위해 외부 패키지를 쓰지 않습니다. -->
+    <SatelliteResourceLanguages>ko;en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <!-- settings.json 은 exe 옆에 복사만 하고, 이미 있으면 덮어쓰지 않습니다. -->
+  <ItemGroup>
+    <None Update="settings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

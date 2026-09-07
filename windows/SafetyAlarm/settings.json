@@ -1,0 +1,8 @@
+{
+  "Server": "192.168.0.10:8080",
+  "Topic": "safety-alerts",
+  "User": "safety-viewer",
+  "Password": "고객사별_비밀번호",
+  "SoundPriority": 4,
+  "NotifyTimeoutMs": 30000
+}

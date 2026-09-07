@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>알람 발신 테스트</title>
+<style>
+  :root {
+    --bg: #12181D;
+    --panel: #1B242C;
+    --line: #2C3843;
+    --text: #E3E9EE;
+    --muted: #8B9AA6;
+    --amber: #F2A93B;
+    --red: #E5484D;
+    --green: #4CC38A;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 20px 64px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; }
+
+  header { margin-bottom: 28px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 6px; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--muted); font-size: 14px; max-width: 62ch; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 20px; }
+  .panel h2 { font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 16px; }
+
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 5px; }
+  .hint-inline { font-size: 12px; color: #6E7C88; font-weight: 400; }
+  input, select {
+    width: 100%; padding: 9px 11px; margin-bottom: 14px;
+    background: #101519; color: var(--text);
+    border: 1px solid var(--line); border-radius: 4px;
+    font-family: inherit; font-size: 14px;
+  }
+  input:focus, select:focus { outline: 2px solid var(--amber); outline-offset: 1px; border-color: transparent; }
+
+  .presets { display: flex; flex-direction: column; gap: 10px; }
+  .alarm {
+    display: flex; align-items: center; gap: 14px; width: 100%;
+    padding: 14px 16px; text-align: left; cursor: pointer;
+    background: #222D36; color: var(--text);
+    border: 1px solid var(--line); border-left: 3px solid var(--amber);
+    border-radius: 4px; font-family: inherit; font-size: 15px;
+  }
+  .alarm:hover:not(:disabled) { background: #29343E; }
+  .alarm:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .alarm:disabled { opacity: 0.5; cursor: wait; }
+  .alarm.critical { border-left-color: var(--red); }
+  .alarm .name { flex: 1; }
+  .alarm .sev { font-size: 12px; color: var(--muted); }
+
+  .log { min-height: 220px; max-height: 420px; overflow-y: auto; }
+  .log-empty { color: var(--muted); font-size: 14px; }
+  .entry {
+    font-family: ui-monospace, Consolas, "D2Coding", monospace;
+    font-size: 12.5px; line-height: 1.5;
+    padding: 9px 0; border-bottom: 1px solid var(--line);
+    white-space: pre-wrap; word-break: break-all;
+  }
+  .entry:last-child { border-bottom: none; }
+  .ok { color: var(--green); }
+  .fail { color: var(--red); }
+  .hint { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>알람 발신 테스트</h1>
+    <p>버튼을 누르면 이벤트가 감지된 것처럼 ntfy 서버로 알람을 보냅니다. 구독 중인 PC 브라우저와 안드로이드 앱에 도달하는지 확인하세요.</p>
+  </header>
+
+  <div class="cols">
+
+    <div class="panel">
+      <h2>발신 대상</h2>
+
+      <label for="server">ntfy 서버 주소</label>
+      <input id="server" type="text" value="http://localhost:8080" spellcheck="false">
+
+      <label for="topic">토픽</label>
+      <input id="topic" type="text" value="safety-alerts" spellcheck="false">
+
+      <label for="token">발행 토큰 <span class="hint-inline">서버의 /opt/safety/.env 안 NTFY_TOKEN</span></label>
+      <input id="token" type="password" value="" placeholder="tk_..." spellcheck="false" autocomplete="off">
+
+      <label for="zone">구역</label>
+      <select id="zone">
+        <option>1구역 · 압출기 라인</option>
+        <option>2구역 · 자재 창고</option>
+        <option>3구역 · 옥외 적재장</option>
+      </select>
+
+      <h2 style="margin-top:22px">알람 종류</h2>
+      <div class="presets">
+        <button class="alarm critical" data-type="fall" data-priority="5">
+          <span class="name">넘어짐 감지</span>
+          <span class="sev">긴급</span>
+        </button>
+        <button class="alarm critical" data-type="intrusion" data-priority="4">
+          <span class="name">위험구역 침입</span>
+          <span class="sev">높음</span>
+        </button>
+        <button class="alarm" data-type="helmet" data-priority="3">
+          <span class="name">안전모 미착용</span>
+          <span class="sev">보통</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>전송 기록</h2>
+      <div class="log" id="log">
+        <p class="log-empty">아직 보낸 알람이 없습니다.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const ALARMS = {
+  fall:      { title: '넘어짐 감지', body: '작업자 넘어짐이 감지되었습니다. 즉시 확인이 필요합니다.', tags: ['rotating_light'] },
+  intrusion: { title: '위험구역 침입', body: '통제 구역에 사람이 진입했습니다.',                      tags: ['warning'] },
+  helmet:    { title: '안전모 미착용', body: '안전모 미착용 상태가 확인되었습니다.',                    tags: ['helmet'] }
+};
+
+const log = document.getElementById('log');
+
+function write(cls, text) {
+  const empty = log.querySelector('.log-empty');
+  if (empty) empty.remove();
+  const el = document.createElement('div');
+  el.className = 'entry ' + cls;
+  el.textContent = new Date().toLocaleTimeString('ko-KR') + '  ' + text;
+  log.prepend(el);
+}
+
+async function send(button) {
+  const alarm = ALARMS[button.dataset.type];
+  const server = document.getElementById('server').value.trim().replace(/\/+$/, '');
+  const topic = document.getElementById('topic').value.trim();
+  const token = document.getElementById('token').value.trim();
+  const zone = document.getElementById('zone').value;
+
+  if (!server || !topic) {
+    write('fail', '서버 주소와 토픽을 먼저 입력하세요.');
+    return;
+  }
+  if (!token) {
+    write('fail', '발행 토큰을 입력하세요. 서버가 인증 없는 발행을 거부합니다.');
+    write('hint', '토큰은 서버의 /opt/safety/.env 파일 안 NTFY_TOKEN 값입니다.');
+    return;
+  }
+
+  const payload = {
+    topic: topic,
+    title: alarm.title + ' — ' + zone,
+    message: zone + '\n' + alarm.body,
+    priority: Number(button.dataset.priority),
+    tags: alarm.tags
+  };
+
+  button.disabled = true;
+  try {
+    // 루트 경로로 JSON 발행. 헤더 방식과 달리 한글·이모지가 깨지지 않습니다.
+    const res = await fetch(server + '/', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      write('fail', 'HTTP ' + res.status + ' — ' + (await res.text()).slice(0, 200));
+      if (res.status === 401 || res.status === 403) {
+        write('hint', '발행 권한이 없습니다. 토큰 값과 토픽 이름을 확인하세요.');
+      }
+    } else {
+      const data = await res.json();
+      write('ok', '전송됨  ' + payload.title + '  (id ' + data.id + ')');
+    }
+  } catch (err) {
+    write('fail', '서버에 연결하지 못했습니다. ' + err.message);
+    write('hint', '확인: 서버 주소가 맞는지, ntfy가 실행 중인지, 이 페이지가 https인데 서버가 http는 아닌지.');
+  } finally {
+    button.disabled = false;
+  }
+}
+
+document.querySelectorAll('.alarm').forEach(b => b.addEventListener('click', () => send(b)));
+</script>
+</body>
+</html>
