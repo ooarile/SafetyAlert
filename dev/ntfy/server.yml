@@ -1,0 +1,10 @@
+listen-http: ":8080"
+
+cache-file: "/var/cache/ntfy/cache.db"
+cache-duration: "24h"
+
+auth-file: "/var/lib/ntfy/user.db"
+auth-default-access: "deny-all"
+
+attachment-cache-dir: ""
+log-level: "info"

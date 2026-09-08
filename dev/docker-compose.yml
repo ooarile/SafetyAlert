@@ -1,0 +1,24 @@
+# 로컬 개발용 알람 서버. 고객사 납품 구성(server/install.sh)과 별개입니다.
+# 포트를 18080/18081 로 띄워 실제 배포 포트(8080)와 겹치지 않게 했습니다.
+services:
+  ntfy:
+    image: binwiederhier/ntfy:v2.11.0
+    container_name: ntfy-dev
+    command: serve
+    ports:
+      - "18080:8080"
+    volumes:
+      - ./ntfy/server.yml:/etc/ntfy/server.yml:ro
+      - ./ntfy/cache:/var/cache/ntfy
+      - ./ntfy/lib:/var/lib/ntfy
+    restart: unless-stopped
+
+  # 발신 테스트 페이지. file:// 로 열면 브라우저가 요청을 막으므로 http 로 서빙합니다.
+  page:
+    image: nginx:alpine
+    container_name: alarm-page-dev
+    ports:
+      - "18081:80"
+    volumes:
+      - ../tools:/usr/share/nginx/html:ro
+    restart: unless-stopped

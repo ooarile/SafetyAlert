@@ -16,8 +16,13 @@
 | `server/prepare-image.sh` | 인터넷 PC에서 오프라인 반입용 이미지 tar 생성 |
 | `windows/SafetyAlarm/` | PC 상주 수신 앱 (.NET 8 WinForms, 외부 패키지 없음) |
 | `windows/build.ps1` | 자체 포함 단일 exe 빌드 |
-| `windows/deploy.ps1` | 고객사 PC 설치 + 시작 프로그램 등록 |
+| `windows/deploy.ps1` | 이 PC에 설치 + 시작 프로그램 등록 |
+| `windows/pack.ps1` | 타 PC 배포용 설치 패키지(zip) 생성 |
+| `windows/package/` | 패키지에 들어가는 설치 스크립트와 현장 안내문 |
+| `windows/run-dev.ps1` | 개발 서버에 붙는 트레이 앱 실행 |
+| `dev/` | 로컬 개발 환경 (ntfy 18080, 테스트 페이지 18081) |
 | `tools/ntfy-alarm-sample.html` | 발신 테스트 페이지 (데모·점검용) |
+| `docs/deck/build.js` | 소개 자료(pptx) 생성 스크립트 |
 | `dist/` | 산출물. git 추적 제외 |
 
 ## 1. 반입 파일 준비 (인터넷 되는 PC)
@@ -50,7 +55,23 @@ sudo VIEWER_PW='고객사별_비밀번호' ./install.sh
 
 발행 토큰은 `/opt/safety/.env` 에 저장됩니다. 백엔드와 발신 테스트 페이지가 이 값을 씁니다.
 
+## 2-1. 로컬 개발 환경
+
+고객사 구성과 별개로, 포트 18080/18081 에 개발용 서버를 띄웁니다.
+
+```bash
+./dev/setup.sh          # 기동 + 계정·토큰 준비. 주소와 토큰을 출력합니다
+```
+
+```powershell
+.\windows\run-dev.ps1   # 개발 서버에 붙는 트레이 앱 실행
+```
+
+내릴 때는 `docker compose -f dev/docker-compose.yml down`.
+
 ## 3. PC 수신 앱 배포
+
+**이 PC에 설치할 때**
 
 ```powershell
 # 관리자 PowerShell
@@ -58,6 +79,23 @@ cd windows; .\deploy.ps1
 notepad 'C:\Program Files\SafetyAlarm\settings.json'   # 서버 IP·비밀번호 수정
 Start-Process 'C:\Program Files\SafetyAlarm\SafetyAlarm.exe'
 ```
+
+**다른 PC에 설치할 때** — 패키지를 만들어 옮깁니다.
+
+```powershell
+cd windows; .\pack.ps1        # dist\SafetyAlarm-설치패키지.zip 생성 (약 58MB)
+```
+
+zip 을 대상 PC로 복사해 압축을 푼 뒤, 그 PC의 관리자 PowerShell 에서 실행합니다.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\설치.ps1
+```
+
+패키지에는 exe, 설정 템플릿, 설치 스크립트, 현장 담당자용 안내문이 들어갑니다.
+대상 PC에 인터넷이나 .NET 런타임은 필요하지 않습니다.
+`C:\Program Files` 쓰기가 막힌 PC라면 설치 위치를
+`%LOCALAPPDATA%\Programs\SafetyAlarm` 으로 바꿔도 동작합니다.
 
 트레이 아이콘에 마우스를 올려 "연결됨" 이 뜨면 정상입니다. 우클릭 → **연결 상태**로 현재 서버·토픽·계정을 확인할 수 있습니다.
 
