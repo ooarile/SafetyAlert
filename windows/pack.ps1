@@ -8,7 +8,7 @@ $root  = Split-Path $PSScriptRoot -Parent
 $exe   = Join-Path $root 'dist\SafetyAlarm\SafetyAlarm.exe'
 $srcs  = Join-Path $PSScriptRoot 'package'
 $stage = Join-Path $root 'dist\package'
-$zip   = Join-Path $root 'dist\SafetyAlarm-설치패키지.zip'
+$zip   = Join-Path $root 'dist\SafetyAlarm-setup.zip'
 
 if (-not (Test-Path $exe)) {
     Write-Error "$exe 가 없습니다. 먼저 .\build.ps1 을 실행하십시오."

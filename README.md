@@ -83,7 +83,7 @@ Start-Process 'C:\Program Files\SafetyAlarm\SafetyAlarm.exe'
 **다른 PC에 설치할 때** — 패키지를 만들어 옮깁니다.
 
 ```powershell
-cd windows; .\pack.ps1        # dist\SafetyAlarm-설치패키지.zip 생성 (약 58MB)
+cd windows; .\pack.ps1        # dist\SafetyAlarm-setup.zip 생성 (약 58MB)
 ```
 
 zip 을 대상 PC로 복사해 압축을 푼 뒤, 그 PC의 관리자 PowerShell 에서 실행합니다.

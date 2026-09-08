@@ -21,4 +21,7 @@ services:
       - "18081:80"
     volumes:
       - ../tools:/usr/share/nginx/html:ro
+      # 설치 패키지를 다른 PC에서 내려받는 경로 /dl/ (사내망 전용)
+      - ../dist:/srv/dist:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
     restart: unless-stopped
